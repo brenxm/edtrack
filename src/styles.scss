@@ -145,3 +145,22 @@ $mainBg: rgb(240, 240, 240);
     }
 }
 
+.modal-container {
+    position: absolute;
+    background-color: rgb(178, 223, 223);
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgb(161, 161, 161);
+    height: 200px;
+    width: 130px;
+}
+
+ #active {
+     @extend .modal-container;
+    display: block;
+ }
+
+ #inactive {
+     @extend .modal-container;
+     display: none;
+ }
+

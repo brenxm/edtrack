@@ -20,6 +20,7 @@ export default class Ui{
             </div>
         `
 
+
         this.generateColumnCell("September", "4", "Monday")
         this.generateColumnCell("September", "5", "Tuesday")
         this.generateColumnCell("September", "6", "Wednesday")
@@ -28,6 +29,8 @@ export default class Ui{
         this.generateColumnCell("September", "9", "Satruday")
         this.generateColumnCell("September", "10", "Sunday")
         this.generateColumnCell()
+
+        this.appendModal();
 
         const columns = document.querySelectorAll(".single-column");
         columns.forEach(ea => ea.addEventListener("mouseenter", (e)=> {
@@ -56,8 +59,8 @@ export default class Ui{
         p.appendChild(singlePrnt);
 
         singlePrnt.addEventListener("click", (e)=>{
-            console.log(e.target);
-        }, false);
+            this.toggleModal(e);
+        }, false)
     }
 
     static generateName(name, time){
@@ -76,5 +79,46 @@ export default class Ui{
         if (btnNode.classList.value != active && btnNode.classList.value != inactive || btnNode.classList.value == undefined || btnNode.classList.value == false) return;
 
         btnNode.classList.value == active ? btnNode.classList.value = inactive : btnNode.classList.value = active;
+    }
+
+    static appendModal(){
+        const dom = document.querySelector(".container");
+        const modal = document.createElement("div");
+        modal.classList.add("modal-container");
+        modal.setAttribute("id", "active");
+        modal.innerHTML = `
+                <div class="modal-hd-container">
+                    <span class="modal-hd-date">Sep 8</span><span class="modal-hd-weekday">Monday</span>
+                </div>
+                <div class="modal-option-container">
+                </div>
+        `;
+        dom.appendChild(modal);
+    }
+
+    static toggleModal(e){
+        const modal = document.querySelector(".modal-container");
+        if(modal.id == "active") return modal.id = "inactive";
+
+        modal.id = "active";
+        const modalWidth = modal.getBoundingClientRect().width;
+        console.log(modal.getBoundingClientRect());
+        const vw = window.innerWidth;
+        const elemTransform = e.target.getBoundingClientRect();
+
+        const elementCenterPos = {
+            x: elemTransform.x + (elemTransform.width / 2),
+            y: elemTransform.y + (elemTransform.height / 2)
+        }
+
+
+        if(vw - elementCenterPos.x > modalWidth + (modalWidth / 2)){
+
+            modal.style.left = `${vw - (vw-elementCenterPos.x) + modalWidth * 2}px`;
+            return;
+        }
+
+        modal.style.left = `${vw - (vw - elementCenterPos.x)}px`;
+
     }
 }
