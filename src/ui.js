@@ -1,4 +1,6 @@
 export default class Ui{
+    hovering = false;
+    modalActive = false;
     static initialize(){
         const body = document.querySelector(".content");
         body.innerHTML = `
@@ -40,10 +42,21 @@ export default class Ui{
 
         columns.forEach(ea => {ea.addEventListener("mouseleave", (e)=> {
             this.toggleButton(e.target.lastElementChild);
+
+            if(this.modalActive){
+                setTimeout(()=>{
+                    if (this.hovering) {
+                        console.log("this dude is hovering");
+                    } else {
+                        this.toggleModal(e);
+                    }
+                }, 150);
+            }
         }), true});
     }
 
     static generateColumnCell(month, day, weekDay){
+        const date = {month: month, day: day, weekDay: weekDay}
         const singlePrnt = document.createElement("div");
         singlePrnt.classList.add("single-column");
         singlePrnt.innerHTML = `
@@ -59,7 +72,7 @@ export default class Ui{
         p.appendChild(singlePrnt);
 
         singlePrnt.addEventListener("click", (e)=>{
-            this.toggleModal(e);
+            this.toggleModal(e, date);
         }, false)
     }
 
@@ -85,10 +98,10 @@ export default class Ui{
         const dom = document.querySelector(".container");
         const modal = document.createElement("div");
         modal.classList.add("modal-container");
-        modal.setAttribute("id", "active");
+        modal.setAttribute("id", "inactive");
         modal.innerHTML = `
                 <div class="modal-hd-container">
-                    <span class="modal-hd-date">Sep 8</span><span class="modal-hd-weekday">Monday</span>
+                    <span class="modal-hd-date"></span><span class="modal-hd-weekday"></span>
                 </div>
                 <div class="modal-option-container">
                 </div>
@@ -96,13 +109,39 @@ export default class Ui{
         dom.appendChild(modal);
     }
 
-    static toggleModal(e){
+    static toggleModal(e, date){
+        switch(e.target.classList.value){
+            case "add-person-btn--active":
+                console.log("clicked add button");
+                break;
+            case "person-container":
+                console.log("clicked person container");
+                break;
+            default:
+                console.log("clicked something else");
+        }
+
         const modal = document.querySelector(".modal-container");
-        if(modal.id == "active") return modal.id = "inactive";
+        if(modal.id == "active") {
+            modal.id = "inactive";
+            this.modalActive = false;
+            return;
+        }
 
         modal.id = "active";
+        document.querySelector(".modal-hd-date").textContent = `${date.month} ${date.day}`;
+        document.querySelector(".modal-hd-weekday").textContent = `${date.weekDay}`
+        this.modalActive = true;
+        modal.addEventListener("mouseenter", ()=>{
+            this.hovering = true;
+            console.log(this.hovering);
+        });
+        modal.addEventListener("mouseleave", ()=>{
+            modal.id = "inactive";
+            this.hovering = false;
+            this.modalActive = false;
+        })
         const modalWidth = modal.getBoundingClientRect().width;
-        console.log(modal.getBoundingClientRect());
         const vw = window.innerWidth;
         const elemTransform = e.target.getBoundingClientRect();
 
@@ -111,14 +150,13 @@ export default class Ui{
             y: elemTransform.y + (elemTransform.height / 2)
         }
 
-
+        modal.style.top = `${elemTransform.y}px`;
         if(vw - elementCenterPos.x > modalWidth + (modalWidth / 2)){
 
-            modal.style.left = `${vw - (vw-elementCenterPos.x) + modalWidth * 2}px`;
+            modal.style.left = `${vw - (vw-elementCenterPos.x) + (modalWidth / 2)}px`;
             return;
         }
 
-        modal.style.left = `${vw - (vw - elementCenterPos.x)}px`;
-
+        modal.style.left = `${vw - (vw - elementCenterPos.x) - (modalWidth * 1.5)}px`;
     }
 }

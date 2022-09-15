@@ -152,6 +152,16 @@ $mainBg: rgb(240, 240, 240);
     box-shadow: 2px 2px 5px rgb(161, 161, 161);
     height: 200px;
     width: 130px;
+
+    .modal-hd-container {
+        font-size: 12px;
+        background-color: rgb(32, 90, 72);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-radius: 5px;
+    }
 }
 
  #active {
