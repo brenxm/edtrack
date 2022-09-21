@@ -1,3 +1,7 @@
+import Storage from "./storage";
+import { parse, format } from "date-fns";
+import DateManager from "./datemanager";
+
 export default class Ui{
     hovering = false;
     modalActive = false;
@@ -16,22 +20,17 @@ export default class Ui{
                 </div>
                 <div class="main-content">
                     <div class="schedule-container">
-                    
                     </div>
                 </div>
             </div>
         `
 
+        const container = document.querySelector(".main-content");
+        container.addEventListener("scroll", (e)=>{
+            console.log("scrolling");
+            console.log(e.target.scrollLeft);
 
-        this.generateColumnCell("September", "4", "Monday")
-        this.generateColumnCell("September", "5", "Tuesday")
-        this.generateColumnCell("September", "6", "Wednesday")
-        this.generateColumnCell("September", "7", "Thursday")
-        this.generateColumnCell("September", "8", "Friday")
-        this.generateColumnCell("September", "9", "Satruday")
-        this.generateColumnCell("September", "10", "Sunday")
-        this.generateColumnCell()
-
+        })
         this.appendModal();
 
         const columns = document.querySelectorAll(".single-column");
@@ -55,34 +54,16 @@ export default class Ui{
         }), true});
     }
 
-    static generateColumnCell(month, day, weekDay){
-        const date = {month: month, day: day, weekDay: weekDay}
-        const singlePrnt = document.createElement("div");
-        singlePrnt.classList.add("single-column");
-        singlePrnt.innerHTML = `
-                <div class="single_header-container">
-                    <div class="hd-container-month">${month}</div>
-                    <div class="hd-container-day">${day}</div>
-                    <div class="hd-container-weekday">${weekDay}</div>
-                </div>
-            ${this.generateName("Jose", "0630-1508")}
-            <button class="add-person-btn--inactive">+</button>
-        `
-        const p = document.querySelector(".schedule-container");
-        p.appendChild(singlePrnt);
-
-        singlePrnt.addEventListener("click", (e)=>{
-            this.toggleModal(e, date);
-        }, false)
-    }
-
-    static generateName(name, time){
+    static generateEmployee(name, time, column){
         const str = `
             <div class="person-container">
                 <div class="person-container_name">${name}</div><div class="person-container_time">${time}</div>
             </div>
-        `
-        return str;
+        `;
+        const elem = new DOMParser().parseFromString(str, "text/html");
+        
+        const employeeContainer = column.children[1];
+        employeeContainer.appendChild(elem.documentElement);
     }
 
     static toggleButton(btnNode){
@@ -159,4 +140,103 @@ export default class Ui{
 
         modal.style.left = `${vw - (vw - elementCenterPos.x) - (modalWidth * 1.5)}px`;
     }
-}
+};
+
+const column = (()=>{
+
+    function singleColumn(processedDate){
+        const singlePrnt = document.createElement("div");
+        singlePrnt.classList.add("single-column");
+        singlePrnt.innerHTML = `
+            <div class="single_header-container">
+                <div class="hd-container-month">${processedDate.month}</div>
+                <div class="hd-container-day">${processedDate.day}</div>
+                <div class="hd-container-weekday">${processedDate.weekDay}</div>
+            </div>
+            <div class="sc_employee-container">
+            </div>
+            <button class="add-person-btn--inactive">+</button>
+        `
+        singlePrnt.addEventListener("click", (e) => {
+            this.toggleModal(e, date);
+        }, false)
+
+        return singlePrnt;
+    }
+
+    function processDates(date) {
+        const parseDate = [];
+        date.forEach(day => {
+            parseDate.push({
+                month: format(parse(day, "MM/dd/yyyy", new Date()), "MMMM"),
+                day: format(parse(day, "MM/dd/yyyy", new Date()), "dd"),
+                weekDay: format(parse(day, "MM/dd/yyyy", new Date()), "EEEE")
+            })
+        })
+
+        return parseDate;
+    }
+
+    function processDay(formattedDay){
+        const rawDate = DateManager.parseDate(formattedDay);
+        const obj = {
+            month: format(rawDate, "MMMM"),
+            day: format(rawDate, "dd"),
+            weekDay: format(rawDate, "EEEE")
+        };
+        return obj;
+    }
+
+    function arrayOfColumns(processDates){
+
+        const arr = [];
+        processDates.forEach(date =>{
+            arr.push(singleColumn(date));
+        })
+
+        return arr;
+    }
+  
+    return {
+        singleColumn,
+        processDates,
+        processDay,
+        arrayOfColumns
+    }
+})();
+
+const scheduleContainer = (()=>{
+    function initialMount(){
+        const container = document.querySelector(".schedule-container");
+        const indexOfCurrentDate = Storage.indexOfCurrentDate();
+
+        container.appendChild(column.singleColumn(column.processDay(Storage.getCurrentDay())));
+
+        mountAfterCurrent(column.arrayOfColumns(column.processDates(Storage.getFutureDay(15, Storage.getCurrentDay()))));
+    }
+
+    function mountBeforeCurrent(arrayOfColumns){
+        const container = document.querySelector(".schedule-container");
+        const arr = arrayOfColumns.reverse();
+
+        arr.forEach(item => {
+            container.prepend(item);
+        })
+    }
+
+    function mountAfterCurrent(arrayOfColumns){
+        const container = document.querySelector(".schedule-container");
+        arrayOfColumns.forEach(item => {
+            container.appendChild(item);
+        })
+    }
+    return {
+        mountAfterCurrent,
+        mountBeforeCurrent,
+        initialMount
+    }
+})();
+
+
+
+export { scheduleContainer, column };

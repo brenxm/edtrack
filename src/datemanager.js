@@ -1,9 +1,9 @@
-import { format, addDays, subDays } from "date-fns";
+import { format, addDays, subDays, parse } from "date-fns";
 
 export default class DateManager{
     static dayFormat = "MM/dd/yyyy";
     
-    static initialLoad(){
+    static updateAnnualDate(){
         const arr = [...DateManager.fetchPreviousDay(182), format(new Date, this.dayFormat), ...DateManager.fetchNextDay(182)];
         return arr;
     }
@@ -23,5 +23,12 @@ export default class DateManager{
         }
         return arr;
     }
+
+    static formatDate(unformattedDate){
+
+    }
    
+    static parseDate(formattedDate){
+        return parse(formattedDate, this.dayFormat, new Date());
+    }
 }
