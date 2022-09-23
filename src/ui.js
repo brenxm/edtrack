@@ -66,15 +66,6 @@ export default class Ui{
         employeeContainer.appendChild(elem.documentElement);
     }
 
-    static toggleButton(btnNode){
-        if (btnNode.classList == null) return;
-        const active = "add-person-btn--active";
-        const inactive = "add-person-btn--inactive";
-        if (btnNode.classList.value != active && btnNode.classList.value != inactive || btnNode.classList.value == undefined || btnNode.classList.value == false) return;
-
-        btnNode.classList.value == active ? btnNode.classList.value = inactive : btnNode.classList.value = active;
-    }
-
     static appendModal(){
         const dom = document.querySelector(".container");
         const modal = document.createElement("div");
@@ -82,68 +73,18 @@ export default class Ui{
         modal.setAttribute("id", "inactive");
         modal.innerHTML = `
                 <div class="modal-hd-container">
-                    <span class="modal-hd-date"></span><span class="modal-hd-weekday"></span>
+                    <div class="hd-container-title"></div>
+                    <div class="modal-hd-date"></div>
+                    <div class="modal-hd-weekday"></div>
                 </div>
                 <div class="modal-option-container">
                 </div>
         `;
         dom.appendChild(modal);
     }
-
-    static toggleModal(e, date){
-        switch(e.target.classList.value){
-            case "add-person-btn--active":
-                console.log("clicked add button");
-                break;
-            case "person-container":
-                console.log("clicked person container");
-                break;
-            default:
-                console.log("clicked something else");
-        }
-
-        const modal = document.querySelector(".modal-container");
-        if(modal.id == "active") {
-            modal.id = "inactive";
-            this.modalActive = false;
-            return;
-        }
-
-        modal.id = "active";
-        document.querySelector(".modal-hd-date").textContent = `${date.month} ${date.day}`;
-        document.querySelector(".modal-hd-weekday").textContent = `${date.weekDay}`
-        this.modalActive = true;
-        modal.addEventListener("mouseenter", ()=>{
-            this.hovering = true;
-            console.log(this.hovering);
-        });
-        modal.addEventListener("mouseleave", ()=>{
-            modal.id = "inactive";
-            this.hovering = false;
-            this.modalActive = false;
-        })
-        const modalWidth = modal.getBoundingClientRect().width;
-        const vw = window.innerWidth;
-        const elemTransform = e.target.getBoundingClientRect();
-
-        const elementCenterPos = {
-            x: elemTransform.x + (elemTransform.width / 2),
-            y: elemTransform.y + (elemTransform.height / 2)
-        }
-
-        modal.style.top = `${elemTransform.y}px`;
-        if(vw - elementCenterPos.x > modalWidth + (modalWidth / 2)){
-
-            modal.style.left = `${vw - (vw-elementCenterPos.x) + (modalWidth / 2)}px`;
-            return;
-        }
-
-        modal.style.left = `${vw - (vw - elementCenterPos.x) - (modalWidth * 1.5)}px`;
-    }
 };
 
 const column = (()=>{
-
     function singleColumn(processedDate){
         const singlePrnt = document.createElement("div");
         singlePrnt.classList.add("single-column");
@@ -155,14 +96,148 @@ const column = (()=>{
             </div>
             <div class="sc_employee-container">
             </div>
-            <button class="add-person-btn--inactive">+</button>
+            <button class="add-person-btn" id ="add-btn--inactive">+</button>
         `
         singlePrnt.addEventListener("click", (e) => {
-            this.toggleModal(e, date);
-        }, false)
+            Modal.on(e, processedDate);
+        }, false);
+
+        singlePrnt.addEventListener("mouseenter", (e)=>{
+            AddBtn.on(e)
+        })
+
+        singlePrnt.addEventListener("mouseleave", (e) => {
+            AddBtn.off(e);
+            setTimeout(()=>{
+                if(!Modal.hoverStatus()){
+                    Modal.off();
+                }
+            }, 200)
+        })
 
         return singlePrnt;
     }
+
+    function getDayInfo(){
+        return date;
+    }
+
+    const AddBtn = (function(){
+        const active = "add-btn--active";
+        const inactive = "add-btn--inactive";
+
+        function on(e){
+            const btn = e.target.lastElementChild;
+            btn.id = active;
+        }
+
+        function off(e){
+            const btn = e.target.lastElementChild;
+            btn.id = inactive;
+        }
+
+        return {
+            on,
+            off,
+            getDayInfo
+        }
+    })();
+
+    const Modal = (function(){
+        let hovering = false;
+
+        function on(e, dayInfo){
+            console.log(e.target.classList.value);
+            switch(e.target.classList.value){
+                case "add-person-btn" :
+                    addEmployee(dayInfo);
+                    break;
+                case "single-column" :
+                    off();
+                    return;
+            }
+            const modal = document.querySelector(".modal-container");
+            
+            modal.id = "active";
+
+
+            modal.addEventListener("mouseenter", ()=>{
+                hovering = true;
+            })
+
+            modal.addEventListener("mouseleave", ()=>{
+                hovering = false;
+                off();
+            })
+            setPosition(e);
+        }
+
+        function off(){
+            const modal = document.querySelector(".modal-container");
+            modal.id = "inactive";
+        }
+
+        function setPosition(e){
+            const modal = document.querySelector(".modal-container");
+            const targetTransform = e.target.getBoundingClientRect();
+
+            modal.style.top = `${targetTransform.y}px`;
+            console.log(window.innerWidth);
+
+            if (window.innerWidth < targetTransform.width + targetTransform.x + modal.getBoundingClientRect().width){
+                modal.style.left = `${targetTransform.x - modal.getBoundingClientRect().width}px`;
+                return;
+            }
+            modal.style.left = `${targetTransform.x + (targetTransform.width)}px`;
+        }
+
+        function hoverStatus(){
+            return hovering;
+        }
+
+        function addEmployee(dayInfo){
+            setHeader("New Employee", dayInfo);
+            const optionContainer = document.querySelector(".modal-option-container");
+            optionContainer.innerHTML = `
+                <form>
+                    <div class="employee-selection">
+                        <label>Employee</label>
+                        <input>
+                    </div>
+                    <div class="work-type">
+                        <label>Type of Work</label>
+                        <input>
+                    </div>
+                    <div class="special-request">
+                         <label>Special Request</label>
+                        <input>
+                    </div>
+                </form>
+            `
+
+        }
+
+        function editEmployee(){
+
+        }
+
+        function setHeader(title, dayInfo){
+            const modal = document.querySelector(".modal-container");
+            const hdTitle = modal.firstElementChild.firstElementChild;
+            const dateTxtElem = modal.firstElementChild.children[1];
+            const weekDayTxtElem = modal.firstElementChild.lastElementChild;
+
+            hdTitle.textContent = title;
+            dateTxtElem.textContent = `${dayInfo.month} ${dayInfo.day}`;
+            weekDayTxtElem.textContent = dayInfo.weekDay;
+        }
+
+        return {
+            on,
+            off,
+            hoverStatus
+        }
+    })();
 
     function processDates(date) {
         const parseDate = [];
