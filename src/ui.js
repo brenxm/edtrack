@@ -119,6 +119,11 @@ const column = (() => {
         return date;
     }
 
+    function getClickedColumn(e){
+        const clicked = e.target;
+        console.log(clicked);
+    }
+
     const AddBtn = (function () {
         const active = "add-btn--active";
         const inactive = "add-btn--inactive";
@@ -147,33 +152,32 @@ const column = (() => {
 
             initiate() {
                 if (typeof this.timer === "number") {
-                    this.cancel;
+                    this.cancel();
                 }
 
                 this.timer = setTimeout(() => {
                     off();
-                }, 1000);
+                }, 800);
             },
 
             cancel() {
                 clearTimeout(this.timer);
-                console.log("calleder");
             }
         }
 
         function on(e, dayInfo) {
             switch (e.target.classList.value) {
                 case "add-person-btn":
-                    Employee.addEmployee(dayInfo);
+                    Employee.addEmployee(dayInfo, e);
                     break;
                 case "single-column":
                     off();
                     return;
             }
             const modal = document.querySelector(".modal-container");
-          
 
-           
+
+
 
             modal.id = "active";
             modalTimer.cancel();
@@ -214,14 +218,16 @@ const column = (() => {
         }
 
         const Employee = (() => {
-            function addEmployee(dayInfo) {
+            let clickedColumn;
+            function addEmployee(dayInfo, e) {
+                clickedColumn = e;
                 setHeader("New Employee", dayInfo);
                 const optionContainer = document.querySelector(".modal-option-container");
                 optionContainer.innerHTML = `
-                <form>
+                <form class="ae_form">
                     <div class="employee-selection">
                         <label>Employee</label>
-                        <select>
+                        <select class = "ae_new-employee-select">
                             <option>Zulma</option>
                             <option>Jose</option>
                             <option>Brenda</option>
@@ -267,11 +273,54 @@ const column = (() => {
                         <button class="ae_btn-cancel">X</button>
                     </div>
                 </form>
-            `
+                `
+
+                const empSelInput = document.querySelector(".ae_new-employee-select");
+                const empSelName = document.querySelector(".ae_new-employee-input");
+                const addBtn = document.querySelector(".ae_btn-accept");
+
+                empSelInput.addEventListener("change", () => {
+                    if (empSelInput.value == "New employee") {
+                        empSelName.style.display = "block";
+                    } else {
+                        empSelName.style.display = "none";
+                    }
+                });
+
+                addBtn.addEventListener("click", (e)=>{
+                    e.preventDefault();
+                    deployEmployee();
+                });
             }
 
-            function deployEmployee(){
-                //deploy information to clicked column
+            function deployEmployee(container) {
+                const addEmployeeForm = document.querySelector(".ae_form");
+                const name = addEmployeeForm[0].value;
+                const newName = addEmployeeForm[1].value;
+                const workLoc = addEmployeeForm[2].value;
+                const workHours = addEmployeeForm[3].value;
+                const specialReq = addEmployeeForm[4].value;
+
+                console.log(`Adding ${name}, working in ${workLoc} at ${workHours} with ${specialReq} request.`);
+
+                const elemStr = `
+                    <div>
+                        <div class="de_employee-name-container">
+                            <div>${name}</div>
+                            <div>
+                                <div>${workLoc}</div>
+                                <div>${workHours}</div>
+                            </div>
+                        </div>
+                        <div class="de_req-container">
+                            <div>icon here</div><div>special request</div>
+                        </div>
+                    </div>
+                `;
+
+                const elem = new DOMParser().parseFromString(elemStr, "text/xml").documentElement;
+                console.log(elem);
+                getClickedColumn(clickedColumn).employeeContainer.appendChild(elem);
             }
 
             function editEmployee() {
@@ -289,8 +338,16 @@ const column = (() => {
                 weekDayTxtElem.textContent = dayInfo.weekDay;
             }
 
+            function getClickedColumn(e) {
+                const clicked = e.target.parentElement;
+                return {
+                    hdContainer: clicked.children[0],
+                    employeeContainer: clicked.children[1]
+                }
+            }
+
             return {
-                addEmployee
+                addEmployee,
             }
         })();
 
@@ -340,7 +397,8 @@ const column = (() => {
         singleColumn,
         processDates,
         processDay,
-        arrayOfColumns
+        arrayOfColumns,
+        getClickedColumn
     }
 })();
 

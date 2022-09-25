@@ -71,6 +71,23 @@ export default class Storage{
         }
 
         return arr;
+    };
+
+    static setEmployee(newEmpObj, formattedDay){
+        /*
+            return
+            day: {
+                employee: [
+                    Zulma: {
+                        workLoc: ED,
+                        time: 0645 - 1508,
+                        specialRed: none
+                    }
+                ],
+                weekend: false
+            }
+        */
+
     }
 }
 
