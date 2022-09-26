@@ -32,6 +32,7 @@ export default class Storage{
     }
 
     static updateDays(){
+        const arr2 = DateManager.initialLoad
         const arr = JSON.stringify(DateManager.initialLoad());
         this.storage.days = arr;
     }

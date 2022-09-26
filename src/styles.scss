@@ -109,21 +109,39 @@ $mainBg: rgb(240, 240, 240);
             display: flex;
             flex-direction: column;
             gap: 5px;
-
+            width: 100%;
+            
+            > * {
+                padding: 0 5px;
+                width: 100%;
+                background-color: rgb(28, 118, 209);
+                color: white;
+                border-radius: 2px;
+                cursor: pointer;
+            }
             .de_employee-name-container {
                 display: flex;
                 align-items: center;
-                background-color: rgb(28, 118, 209);
+                justify-content: space-between;
 
                 :nth-child(1) {
                     color: white;
                 }
 
-                :nth-child(2) {}
+                :nth-child(2) {
+                    font-size: 10px;
+                }
             }
 
             .de_req-container {
-                display: none;
+                display: flex;
+                font-size: 10px;
+                gap: 10px;
+
+                img {
+                    width: 10px;
+                    height: 10px;
+                }
             }
 
 

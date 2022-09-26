@@ -24,7 +24,7 @@ export default class Ui {
                 </div>
             </div>
         `
-
+        
         const container = document.querySelector(".main-content");
         container.addEventListener("scroll", (e) => {
             console.log("scrolling");
@@ -176,9 +176,6 @@ const column = (() => {
             }
             const modal = document.querySelector(".modal-container");
 
-
-
-
             modal.id = "active";
             modalTimer.cancel();
 
@@ -219,6 +216,12 @@ const column = (() => {
 
         const Employee = (() => {
             let clickedColumn;
+            function EmployeeSlot(name, workLoc, workHours, specialReq){
+                return {
+                    name, workLoc, workHours, specialReq
+                }
+            }
+
             function addEmployee(dayInfo, e) {
                 clickedColumn = e;
                 setHeader("New Employee", dayInfo);
@@ -278,6 +281,7 @@ const column = (() => {
                 const empSelInput = document.querySelector(".ae_new-employee-select");
                 const empSelName = document.querySelector(".ae_new-employee-input");
                 const addBtn = document.querySelector(".ae_btn-accept");
+                const cancelBtn = document.querySelector(".ae_btn-cancel");
 
                 empSelInput.addEventListener("change", () => {
                     if (empSelInput.value == "New employee") {
@@ -289,38 +293,48 @@ const column = (() => {
 
                 addBtn.addEventListener("click", (e)=>{
                     e.preventDefault();
-                    deployEmployee();
+                    appendToContainer();
+                    Modal.off();
+                });
+
+                cancelBtn.addEventListener("click", (e)=>{
+                    e.preventDefault();
+                    Modal.off();
                 });
             }
 
-            function deployEmployee(container) {
-                const addEmployeeForm = document.querySelector(".ae_form");
-                const name = addEmployeeForm[0].value;
-                const newName = addEmployeeForm[1].value;
-                const workLoc = addEmployeeForm[2].value;
-                const workHours = addEmployeeForm[3].value;
-                const specialReq = addEmployeeForm[4].value;
+            function appendToContainer(container) {
+                const form = document.querySelector(".ae_form");
+                const employee = new EmployeeSlot(form[0].value, form[2].value, form[3].value, form[4].value);
 
-                console.log(`Adding ${name}, working in ${workLoc} at ${workHours} with ${specialReq} request.`);
+                console.log(`Adding ${employee.name}, working in ${employee.workLoc} at ${employee.workHours} with ${employee.specialReq} request.`);
 
                 const elemStr = `
                     <div>
                         <div class="de_employee-name-container">
-                            <div>${name}</div>
+                            <div>${employee.name}</div>
                             <div>
-                                <div>${workLoc}</div>
-                                <div>${workHours}</div>
+                                <div>${employee.workLoc}</div>
+                                <div>${employee.workHours}</div>
                             </div>
                         </div>
                         <div class="de_req-container">
-                            <div>icon here</div><div>special request</div>
+                            <div>${employee.specialReq == "None" ? "" : "<img src=`#`>"}</div><div>${employee.specialReq == "None" ? "" : employee.specialReq}</div>
                         </div>
                     </div>
                 `;
 
-                const elem = new DOMParser().parseFromString(elemStr, "text/xml").documentElement;
-                console.log(elem);
-                getClickedColumn(clickedColumn).employeeContainer.appendChild(elem);
+                getClickedColumn(clickedColumn).employeeContainer.innerHTML += elemStr;
+
+                function specReq(specReq){
+                    const specReqElem = document.querySelector(".de_req-container");
+                    if(specReq == "None"){
+                        return;
+                    }
+
+                    specReqElem.style.display = "block";
+                    return specReq;
+                }
             }
 
             function editEmployee() {
