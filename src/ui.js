@@ -56,18 +56,6 @@ export default class Ui {
         });
     }
 
-    static generateEmployee(name, time, column) {
-        const str = `
-            <div class="person-container">
-                <div class="person-container_name">${name}</div><div class="person-container_time">${time}</div>
-            </div>
-        `;
-        const elem = new DOMParser().parseFromString(str, "text/html");
-
-        const employeeContainer = column.children[1];
-        employeeContainer.appendChild(elem.documentElement);
-    }
-
     static appendModal() {
         const dom = document.querySelector(".container");
         const modal = document.createElement("div");
@@ -173,6 +161,9 @@ const column = (() => {
                 case "single-column":
                     off();
                     return;
+                default :
+                console.log(e.target.classList.value);
+
             }
             const modal = document.querySelector(".modal-container");
 
@@ -294,6 +285,7 @@ const column = (() => {
                 addBtn.addEventListener("click", (e)=>{
                     e.preventDefault();
                     appendToContainer();
+                    Storage.newEmployeeSlot();
                     Modal.off();
                 });
 
@@ -301,6 +293,10 @@ const column = (() => {
                     e.preventDefault();
                     Modal.off();
                 });
+            }
+
+            function editEmployee(e) {
+                setHeader()
             }
 
             function appendToContainer(container) {
@@ -337,10 +333,7 @@ const column = (() => {
                 }
             }
 
-            function editEmployee() {
-
-            }
-
+        
             function setHeader(title, dayInfo) {
                 const modal = document.querySelector(".modal-container");
                 const hdTitle = modal.firstElementChild.firstElementChild;

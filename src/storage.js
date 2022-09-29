@@ -2,12 +2,31 @@ import DateManager from "./datemanager";
 import { parse, format } from "date-fns";
 
 export default class Storage{
-    static storage = localStorage;
+    static dataStorage = {
+        days: [],
+        employees: [],
+        messages: [],
+        notifications: []
+    };
+
+    static saveDataToLocalStorage(){
+        localStorage.clear();
+        for(const dataSet in this.dataStorage){
+            localStorage.setItem(dataSet, JSON.stringify(this.dataStorage[dataSet]));
+        }
+    }
+
+    static localStorageToData(){
+        for(const dataSet in this.dataStorage){
+            this.dataStorage[dataSet] = JSON.parse(localStorage.getItem(dataSet));
+        }
+    }
 
     static initializeStorage(){
-        this.storage.clear();
-        this.storage.setItem("days", "");
-        this.storage.setItem("employee", "");
+    }
+
+    static updateDays(){
+        localStorage
     }
 
     static saveAnnual(){
@@ -15,7 +34,10 @@ export default class Storage{
         const arr = [];
         days.forEach(day => {
             const obj = {};
-            obj[day] = "new employee here";
+            obj[day] = {
+                employee: [],
+                weekday: false
+            };
             arr.push(obj);
         })
         return arr;
@@ -32,10 +54,21 @@ export default class Storage{
     }
 
     static updateDays(){
-        const arr2 = DateManager.initialLoad
-        const arr = JSON.stringify(DateManager.initialLoad());
-        this.storage.days = arr;
-    }
+        const arr2 = DateManager.updateAnnualDate();
+        const tempArr = [];
+        arr2.forEach(arri => {
+            const obj = {
+                [arri]: {
+                    employee: [
+
+                    ],
+                    weekend: false
+                }
+            };
+            tempArr.push(obj);
+        });
+        this.storage.days = JSON.stringify(tempArr);
+    };
 
     static getCurrentDay(){
         const formatDate = format(new Date(), DateManager.dayFormat);
@@ -43,13 +76,24 @@ export default class Storage{
         return parsedDate.find(days => days == formatDate);
     }
 
+    static getDate(formattedDy){
+        const storage = JSON.parse(this.storage.days);
+        let x;
+        return {
+            day: storage.find(item => {
+                    if(Object.keys(item)[0] == formattedDy){
+                        x = storage.indexOf(item);
+                    }
+                    return Object.keys(item)[0] == formattedDy}),
+            storageIndex: x
+        };
+    }
+
     static indexOfCurrentDate(){
         const days = JSON.parse(this.storage.days);
         return days.indexOf(this.getCurrentDay());
     }
 
-    //get past date/dates using reference date (exclusive)
-    //accepting formatted dates arguments only
     static getPastDay(count, referenceDate){
         const days = JSON.parse(this.storage.days);
         const indexOfReferenceDate = days.indexOf(days.find(day => day == referenceDate));
@@ -74,6 +118,10 @@ export default class Storage{
         return arr;
     };
 
+    static getParsedStorage(){
+        return JSON.parse(this.storage.days);
+    }
+
     static setEmployee(newEmpObj, formattedDay){
         /*
             return
@@ -88,7 +136,24 @@ export default class Storage{
                 weekend: false
             }
         */
+    };
 
+    static newEmployeeSlot(empObj, formattedDay){
+        //get parsed storage
+        //set new employee obj
+        //update parsed storage
+        const testObj = {
+            name: "Zulma",
+            workLoc: "ED",
+            workTime: "0646"
+        }
+        const date = this.getDate(formattedDay);
+        const employeeStorage = JSON.parse(this.storage.days)[date.storageIndex][formattedDay].employee;
     }
+
+    //make a separate storage for functional
+    //make a function to save Stringied data to storage
+  
 }
+
 

@@ -123,7 +123,10 @@ $mainBg: rgb(240, 240, 240);
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-
+                
+                * {
+                    pointer-events: none;
+                }
                 :nth-child(1) {
                     color: white;
                 }

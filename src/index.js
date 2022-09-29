@@ -5,6 +5,7 @@ import { scheduleContainer, column } from "./ui";
 
 import Ui from "./ui";
 
+Storage.initializeStorage();
 Ui.initialize();
 
-scheduleContainer.initialMount();
+//scheduleContainer.initialMount();
